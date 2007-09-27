@@ -1,0 +1,111 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides: iaxmodem
+# Required-Start: $local_fs $network $remote_fs
+# Should-Start: asterisk
+# Required-Stop: $local_fs $network $remote_fs
+# Should-Stop: asterisk
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
+# Short-Description: IAXmodem
+# Description: IAXmodem
+### END INIT INFO
+
+WITHOUT_RC_COMPAT=1
+
+. /etc/init.d/functions
+
+LOCKFILE=/var/lock/iaxmodem/iaxmodem
+PIDFILE=/var/run/iaxmodem/iaxmodem.pid
+
+DAEMON=/usr/sbin/iaxmodem
+NAME=iaxmodem
+DESC=iaxmodem
+
+test -x $DAEMON || exit 0
+
+
+set -e
+
+# Source iaxmodem configuration.
+SourceIfNotEmpty /etc/sysconfig/iaxmodem
+
+RETVAL=0
+
+mkdir -p /var/run/iaxmodem 2>/dev/null
+chown uucp /var/run/iaxmodem
+
+
+
+start()
+{
+	start_daemon --lockfile "$LOCKFILE" --expect-user root $DAEMON 
+	RETVAL=$?
+	return $RETVAL
+}
+
+stop()
+{
+	stop_daemon  --lockfile "$LOCKFILE" --expect-user root $DAEMON
+	RETVAL=$?
+	return $RETVAL
+}
+
+restart()
+{
+    stop
+    sleep 1
+    start
+}
+
+reload()
+{
+    echo -n "Reloading $DESC: "
+    if [ -e /var/run/$NAME/$NAME.pid ]; then
+	kill -HUP $(cat /var/run/$NAME/$NAME.pid)
+	echo "$NAME."
+    else
+	echo "$NAME not running!"
+	exit 1
+    fi
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+	;;
+    reload)
+    	reload
+	;;
+    condstop)
+        if [ -e "$LOCKFILE" ]; then
+	    stop
+	fi
+	;;
+condrestart)
+	if [ -e "$LOCKFILE" ]; then
+	    restart
+	fi
+	;;
+condreload)
+	if [ -e "$LOCKFILE" ]; then
+	    reload
+	fi
+	;;
+status)
+	status --lockfile "$LOCKFILE" --expect-user root -- $NAME
+	RETVAL=$?
+	;;
+restart|force-reload)
+	stop
+	start
+	;;
+*)
+       msg_usage "${0##*/} {start|stop|restart|reload|force-reload}"
+        RETVAL=1
+esac
+
+exit $RETVAL

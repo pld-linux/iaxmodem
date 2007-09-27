@@ -1,0 +1,11 @@
+--- ./build.orig	2006-07-31 23:29:49 +0400
++++ ./build	2006-10-24 13:56:43 +0400
+@@ -23,7 +23,7 @@
+     cd ../.. && \
+     gcc -Wall -g -DMODEMVER=\"$MODEMVER\" -DDSPVER=\"$DSPVER\" -DIAXVER=\"$IAXVER\" -DSTATICLIBS -D_GNU_SOURCE \
+ 	-std=c99 -Ilib/libiax2/src -Ilib/spandsp/src -c -o iaxmodem.o iaxmodem.c && \
+-    gcc -lm -lutil -ltiff -o iaxmodem iaxmodem.o lib/spandsp/src/.libs/libspandsp.a lib/libiax2/src/.libs/libiax.a
++    gcc  -o iaxmodem iaxmodem.o lib/spandsp/src/.libs/libspandsp.a lib/libiax2/src/.libs/libiax.a -lm -lutil -ltiff
+ else
+     gcc -Wall -g -DMODEMVER=\"$MODEMVER\" -DDSPVER=\"$DSPVER\" -DIAXVER=\"$IAXVER\" \
+ 	-lm -liax -lutil -lspandsp -ltiff -o iaxmodem iaxmodem.c
