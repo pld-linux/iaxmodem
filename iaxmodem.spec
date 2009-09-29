@@ -1,20 +1,20 @@
 Summary:	IAX software fax modem
 Summary(pl.UTF-8):	Programowy faxmodem komunikujący się za pomocą protokołu IAX
 Name:		iaxmodem
-Version:	0.3.1
+Version:	1.2.0
 Release:	1
 License:	GPL
 Group:		Applications/System
 Source0:	http://dl.sourceforge.net/iaxmodem/%{name}-%{version}.tar.gz
-# Source0-md5:	de2d1ca6ed6e864ad50f92dfa0933772
+# Source0-md5:	f8b26cfeed188e5c1dcbc5ae5ef923b3
 Source2:	%{name}.init
 Source3:	%{name}-sysconfig
 Source4:	%{name}.ttyIAX
-Patch0:		%{name}.as-needed.patch
 URL:		http://iaxmodem.sourceforge.net/
 BuildRequires:	autoconf
 BuildRequires:	automake
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
+Requires(post,preun):   /sbin/chkconfig
 
 %description
 IAXmodem is a software modem written in C that uses an IAX channel
@@ -28,7 +28,6 @@ bibliotekę DSP zamiast sprzętowych chipsetów DSP.
 
 %prep
 %setup -q
-%patch0 -p0
 
 %build
 ./build static
@@ -49,6 +48,15 @@ touch $RPM_BUILD_ROOT/var/log/%{name}/%{name}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
+
+%post
+echo "Please check your new iax entry in /etc/iaxmodem/ttyIAX is correct."
+/sbin/chkconfig --add iaxmodem
+%service iaxmodem restart
+
+%preun
+%service iaxmodem stop
+/sbin/chkconfig --del iaxmodem
 
 %files
 %defattr(644,root,root,755)
